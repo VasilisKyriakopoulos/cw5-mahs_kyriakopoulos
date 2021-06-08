@@ -6,16 +6,19 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SparseMatrixLIL implements SparseMatrix {
-    private ArrayList<LinkedList>matrix ;
+public class SparseMatrixLIL implements SparseMatrix{
+    private ArrayList<ArrayList>matrix ;
     private int r , c;
 
-    private class ElementInfo  implements Comparable<ElementInfo>{
+    private class ElementInfo  implements Comparable<ElementInfo> {
         private int col;
         private double value;
         public ElementInfo(int col,double value){
             this.col = col;
             this.value = value;
+        } 
+        public ElementInfo(int col){
+            this.col = col;
         } 
         @Override
         public int compareTo(ElementInfo o) {
@@ -27,15 +30,15 @@ public class SparseMatrixLIL implements SparseMatrix {
             }
             return 0;
         }
+       
     }
     
-
     public SparseMatrixLIL(int r, int c){
         this.r = r;
         this.c = c;
-        this.matrix= new ArrayList<LinkedList>();
+        this.matrix= new ArrayList<ArrayList>();
         for(int i = 0;i<r ;i++){
-            this.matrix.add(new LinkedList<ElementInfo>());
+            this.matrix.add(new ArrayList<ElementInfo>());
         }
     }
     public int rowCount(){
@@ -48,15 +51,13 @@ public class SparseMatrixLIL implements SparseMatrix {
         if (r>this.r || c>this.c){
             throw  new IndexOutOfBoundsException("Row or Column given was out of bounds");
         }
-        LinkedList<ElementInfo> list = this.matrix.get(r);
-        Iterator<ElementInfo> iter = list.iterator();
-        while(iter.hasNext()){
-            ElementInfo element = iter.next();
-            if(element.col ==c){
-                return element.value;
-            }
+        ArrayList<ElementInfo> list = this.matrix.get(r);
+        int i = Collections.binarySearch(list, new ElementInfo(c));
+        if(i>=0){
+            return list.get(i).value;
         }
         return 0;
+        
     }
     public void set(int r, int c, double element){
         if (r>this.r || c>this.c)
@@ -69,42 +70,34 @@ public class SparseMatrixLIL implements SparseMatrix {
                 zero(r,c);
             }
             else{
-            LinkedList<ElementInfo> list = this.matrix.get(r);
-            Iterator<ElementInfo> iter = list.iterator();
-            boolean flag = true;
-            while(iter.hasNext()){
-                ElementInfo el = iter.next();
-                if(el.col ==c){
-                    el.value=element;
-                    flag = false;
-                }
-            }
-            if(flag){
+            ArrayList<ElementInfo> list = this.matrix.get(r);
+            zero(r, c);//in order to delete if we have item on [r,c]
             list.add(new ElementInfo(c,element));
-            }
             Collections.sort(list);
             }
         }
+
     }
+    
     public void zero(int r, int c){
         if (r>this.r || c>this.c)
         {
             throw  new IndexOutOfBoundsException("Row or Column given was out of bounds"); 
         }
         else{
-            LinkedList<ElementInfo> list = this.matrix.get(r);
-            Iterator<ElementInfo> iter = list.iterator();
-            while(iter.hasNext()){
-            ElementInfo element = iter.next();
-            if(element.col ==c){
-                iter.remove();
+            ArrayList<ElementInfo> list = this.matrix.get(r);
+            int i = Collections.binarySearch(list, new ElementInfo(c));
+            if(i>=0){
+                list.remove(i);
             }
-        }
+            
         }
     }
+
     public void clear(){
         this.matrix.clear();
     }
+
     public boolean isEmpty(){
         for(int i=0;i<matrix.size();i++){
             if(matrix.get(i).size()!=0){
@@ -113,13 +106,14 @@ public class SparseMatrixLIL implements SparseMatrix {
         }
         return true;
     }
+
     public String toString(){
         StringBuilder s = new StringBuilder();
         s.append("[");
         for(int i=0;i<matrix.size();i++){
-            Iterator<ElementInfo> iter = matrix.get(i).iterator();
-            while(iter.hasNext()){
-                ElementInfo element = iter.next();
+            
+            for(int j=0; j<matrix.get(i).size();j++){
+                ElementInfo element = (ElementInfo)matrix.get(i).get(j);
                 s.append("("+i+", "+ element.col+": "+ element.value+")");
             }
         }
