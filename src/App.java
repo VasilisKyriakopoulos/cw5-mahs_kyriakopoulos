@@ -28,7 +28,7 @@ public class App {
         // SparseMatrixDOK
         SparseMatrixDOK b = new SparseMatrixDOK(1000, 1000);
         System.out.println(b.get(1, 1));
-        b.set(1, 2,1.0);
+        b.set(1, 2,1e-6);
         b.set(1, 1,1.0);
         System.out.println(b.get(1, 1));
         System.out.println(b);

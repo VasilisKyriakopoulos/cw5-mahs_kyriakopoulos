@@ -45,16 +45,36 @@ public class SparseMatrixDOK implements SparseMatrix {
         return this.c;
     }
     public double get(int r, int c){
+        if (r>this.r || c>this.c)
+        {
+            throw  new IndexOutOfBoundsException("Row or Column given was out of bounds"); 
+        }
+        else{
         Double check = map.get(new ElementPos(r, c));
         if(check!=null){
             return check;
         }
+    }
         return 0.0;
     }
     public void set(int r, int c, double element){
-       this.map.put(new ElementPos(r, c), element);  
+        if (r>this.r || c>this.c)
+        {
+            throw  new IndexOutOfBoundsException("Row or Column given was out of bounds"); 
+        }
+        double error = 1e-5;
+            if(Math.abs(element) < error){
+                zero(r,c);
+            }
+            else{ 
+                this.map.put(new ElementPos(r, c), element);  
+            }
     }
     public void zero(int r, int c){
+        if (r>this.r || c>this.c)
+        {
+            throw  new IndexOutOfBoundsException("Row or Column given was out of bounds"); 
+        }
         this.map.remove(new ElementPos(r, c));
     }
     public void clear(){
